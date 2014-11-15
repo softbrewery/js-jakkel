@@ -1,0 +1,2 @@
+Jakkel - JavaScript ACL Implementation
+======================================
