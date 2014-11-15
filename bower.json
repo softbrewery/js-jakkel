@@ -1,0 +1,26 @@
+{
+  "name": "js-jakkel",
+  "version": "0.0.1",
+  "homepage": "https://github.com/softbrewery/js-jakkel",
+  "authors": [
+    { 
+      "name": "Steven Ceuppens", 
+      "email": "steven.ceuppens@softbrewery.com", 
+      "homepage": "http://softbrewery.com"
+    }
+  ],
+  "description": "JavaScript ACL Implementation",
+  "main": "dist/jakkel.js",
+  "moduleType": [
+    "amd",
+    "node"
+  ],
+  "keywords": [
+    "acl"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+  ]
+}
