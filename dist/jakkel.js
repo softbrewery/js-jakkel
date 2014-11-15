@@ -16,7 +16,7 @@
   /*
    * Current version.
    */
-  Jakkel.prototype.VERSION = '0.0.1';
+  Jakkel.prototype.VERSION = '0.0.2';
 
   /* 
    * Get roles

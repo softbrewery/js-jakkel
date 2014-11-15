@@ -1,6 +1,6 @@
 {
   "name": "js-jakkel",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "JavaScript ACL Implementation",
   "main": "src/jakkel.js",
   "scripts": {
