@@ -4,7 +4,8 @@
   "description": "JavaScript ACL Implementation",
   "main": "src/jakkel.js",
   "scripts": {
-    "test": "./node_modules/karma/bin/karma start"
+    "test": "node ./node_modules/gulp/bin/gulp test",
+    "build": "node ./node_modules/gulp/bin/gulp build"
   },
   "repository": {
     "type": "git",
@@ -13,7 +14,10 @@
   "keywords": [
     "acl"
   ],
-  "author": "Steven Ceuppens",
+  "author": {
+    "name": "Steven Ceuppens",
+    "email": "steven.ceuppens@softbrewery.com"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/softbrewery/js-jakkel/issues"
@@ -31,5 +35,8 @@
     "karma-jasmine": "^0.2.3",
     "karma-mocha-reporter": "^0.3.1",
     "karma-phantomjs-launcher": "^0.1.4"
+  },
+  "engines": {
+    "node": ">=0.11.0"
   }
 }

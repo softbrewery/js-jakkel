@@ -22,7 +22,7 @@ gulp.task('test', function() {
     });
 });
 
-gulp.task('build', function() {
+gulp.task('build', ['clean', 'test'], function() {
   return gulp.src('src/**/*.js')
     .pipe(jshint())
     .pipe(jshint.reporter('default'))
@@ -34,6 +34,6 @@ gulp.task('build', function() {
     .pipe(size());
 });
 
-gulp.task('default', ['clean', 'test'], function() {
+gulp.task('default', function() {
   gulp.start('build');
 });
