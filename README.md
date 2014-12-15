@@ -52,7 +52,37 @@ acl.addRole('user');
 acl.addRole('admin', 'user');
 ```
 
+#### resources()
+Returns the list of currently defined resources. 
+- Return type is an Array of Resource objects.
 
+```javascript
+var resources = acl.resources();
+```
+
+#### resource(name)
+Returns a resource of the currently defined resources list. 
+- The `name` argument is of type String. 
+- Return type is a Resource object.
+
+```javascript
+var resource = acl.resource('products');
+```
+
+#### addResource(name, actions)
+Adds a resources the the list of resources. Actions are optional but can be used to have more control.
+- The `name` argument is of type String. 
+- The `actions` argument is optional and of type String or Array. 
+- Returns true is succeeded.
+
+```javascript
+acl.addResource('profile');
+acl.addResource('profile', '*');
+acl.addResource('profile', ['*']);
+```
+```javascript
+acl.addResource('products', ['list','detail','edit','delete','update']);
+```
 
 ### Development
 ---
