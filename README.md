@@ -76,6 +76,7 @@ Adds a resources the the list of resources. Actions are optional but can be used
 - Returns true is succeeded.
 
 ```javascript
+// equivalents
 acl.addResource('profile');
 acl.addResource('profile', '*');
 acl.addResource('profile', ['*']);
