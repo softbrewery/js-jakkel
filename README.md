@@ -32,7 +32,7 @@ Returns the list of currently defined roles.
 var roles = acl.roles();
 ```
 
-#### role(name)
+#### role(roleName)
 Returns a role of the currently defined roles list. 
 - The `name` argument is of type String. 
 - Return type is a Role object.
@@ -41,11 +41,11 @@ Returns a role of the currently defined roles list.
 var role = acl.role('admin');
 ```
 
-#### addRole(name, parent)
+#### addRole(roleName, parent)
 Adds a role the the list of roles.
 - The `name` argument is of type String. 
 - The `parent` argument is optional and of type String. 
-- Returns true is succeeded.
+- Returns true if succeeded.
 
 ```javascript
 acl.addRole('user');
@@ -60,20 +60,20 @@ Returns the list of currently defined resources.
 var resources = acl.resources();
 ```
 
-#### resource(name)
+#### resource(resourceName)
 Returns a resource of the currently defined resources list. 
-- The `name` argument is of type String. 
+- The `resourceName` argument is of type String. 
 - Return type is a Resource object.
 
 ```javascript
 var resource = acl.resource('products');
 ```
 
-#### addResource(name, actions)
+#### addResource(resourceName, actions)
 Adds a resources the the list of resources. Actions are optional but can be used to have more control.
-- The `name` argument is of type String. 
+- The `resourceName` argument is of type String. 
 - The `actions` argument is optional and of type String or Array. 
-- Returns true is succeeded.
+- Returns true if succeeded.
 
 ```javascript
 // equivalents
@@ -82,7 +82,46 @@ acl.addResource('profile', '*');
 acl.addResource('profile', ['*']);
 ```
 ```javascript
-acl.addResource('products', ['list','detail','edit','delete','update']);
+acl.addResource('products', ['list', 'detail', 'edit', 'delete', 'update']);
+```
+
+#### allow(roleName, resourceName, actions)
+Adds permission for a role to a resource
+- The `roleName` argument is of type String. 
+- The `resourceName` argument is of type String.
+- The `actions` argument is optional and of type String or Array.
+- Returns true if succeeded.
+
+```javascript
+acl.allow('anonymous', 'products', 'list');
+acl.allow('user', 'products', ['detail', 'comments']);
+acl.allow('admin', 'products', ['add', 'delete', 'update']);
+```
+```javascript
+// equivalents
+acl.allow('user', 'profile');
+acl.allow('user', 'profile', '*');
+acl.allow('user', 'profile', ['*']);
+```
+
+#### deny(roleName, resourceName, actions)
+Deny a resource for a role
+- The `roleName` argument is of type String. 
+- The `resourceName` argument is of type String.
+- The `actions` argument is optional and of type String or Array.
+- Returns true if succeeded.
+
+```javascript
+// user inherits from anonymous
+acl.addRole('anonymous');
+acl.addRole('user', 'anonymous');
+
+// anonymous can login, user can logout
+acl.allow('anonymous', 'auth', ['login','signup']);
+acl.allow('user', 'auth', ['logout']);
+
+// user can't acces login or signup
+acl.deny('user', 'auth', ['login','signup']);
 ```
 
 ### Development
