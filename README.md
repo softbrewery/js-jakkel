@@ -124,6 +124,45 @@ acl.allow('user', 'auth', ['logout']);
 acl.deny('user', 'auth', ['login','signup']);
 ```
 
+#### config()
+Return the Jakkel config
+```javascript
+var config = acl.config();
+
+// example config
+{
+    "roles": [
+        { "role": "anonymous" },
+        { "role": "user", "parent": "anonymous" },
+        { "role": "admin", "parent": "user" }
+    ],
+    "resources": [
+        { 
+            "resource": "auth", 
+            "actions": [
+                { "action": "login", "allow": ["anonymous"], "deny": ["user"] },
+                { "action": "signup", "allow": ["anonymous"], "deny": ["user"] },
+                { "action": "logout", "allow": ["user"] }
+            ] 
+        },
+        { 
+            "resource": "products", 
+            "actions": [
+                { "action": "list", "allow": ["user"] },
+                { "action": "detail", "allow": ["user"] },
+                { "action": "add", "allow": ["admin"] }
+            ] 
+        },
+        { 
+            "resource": "profile", 
+            "actions": [
+                { "action": "*", "allow": ["user"] }
+            ] 
+        }
+    ]
+}
+```
+
 ### Development
 ---
 ### Todo's
