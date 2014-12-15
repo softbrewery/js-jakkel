@@ -124,6 +124,28 @@ acl.allow('user', 'auth', ['logout']);
 acl.deny('user', 'auth', ['login','signup']);
 ```
 
+#### isAllowed(roleName, resourceName, actions)
+Returns true or false depending if the permission is found.
+- The `roleName` argument is of type String.
+- The `resourceName` argument is of type String.
+- The `actions` argument is optional and of type Array or String.
+- Return true or false.
+
+```javascript
+// equivalent
+var state = acl.isAllowed('user', 'products', 'list');
+var state = acl.isAllowed('user', 'products', ['list']);
+```
+```javascript
+var state = acl.isAllowed('user', 'products', ['list','detail']);
+```
+```javascript
+// equivalent
+var state = acl.isAllowed('user', 'auth');
+var state = acl.isAllowed('user', 'auth', '*');
+var state = acl.isAllowed('user', 'auth', ['*']);
+```
+
 #### config()
 Return the Jakkel config
 ```javascript
