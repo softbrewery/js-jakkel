@@ -159,14 +159,17 @@ Executes the `callback` if the role is allowed to the resource
 ```javascript
 // Callback style
 acl.ifAllowed('user', 'products', 'list', function() {
-    ...
+    // do something if allowed
 });
 ```
 ```javascript
 // Promise style
 acl.ifAllowed('user', 'products', 'list')
     .then(function() {
-        ...
+        // do something if allowed
+    })
+    .catch(function() {
+        // do something if not allowed
     });
 ```
 
