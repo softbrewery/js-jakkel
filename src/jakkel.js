@@ -21,18 +21,18 @@
    /* Function:
     * Flush the config, used for testing. 
     */
-   var Jakkal.prototype.flush = function() {
-     this._conifig.roles = [];
-     this._conifig.resources = [];
+   Jakkel.prototype.flush = function() {
+     this._config.roles = [];
+     this._config.resources = [];
    };
 
    /* Function:
     * Get roles
     * @return Array
     */
-    Jakkel.prototype.roles = function() {
-      return this._config.roles;
-    };
+  Jakkel.prototype.roles = function() {
+    return this._config.roles;
+  };
 
    /* Function:
     * Get Role
@@ -72,12 +72,11 @@
   /**
    * Clear the contents of an Array
    */
-  if ( typeof Array.clear !== 'undefined' {
+  /*if ( typeof Array.clear !== 'undefined' ){ */ 
     Array.prototype.clear = function() {
       while (this.length > 0) {
         this.pop();
       }
-    }
   };
 
   //##############################################################
