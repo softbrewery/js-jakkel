@@ -12,6 +12,9 @@ JS-Jakkel is a JavaScript ACL implementation inspired by the Zend Framework. Its
 ```sh
 $ bower install --save js-jakkel
 ```
+```sh
+$ npm install --save js-jakkel
+```
 
 ### Api
 ```javascript
