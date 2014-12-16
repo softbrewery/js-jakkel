@@ -17,6 +17,7 @@ $ npm install --save js-jakkel
 ```
 
 ### Api
+---
 ```javascript
 var acl = new Jakkel;
 ```
