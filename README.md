@@ -151,7 +151,7 @@ Return the Jakkel config
 ```javascript
 var config = acl.config();
 
-// example config
+// example contents of config variable
 {
     "roles": [
         { "role": "anonymous" },
@@ -183,6 +183,15 @@ var config = acl.config();
         }
     ]
 }
+```
+
+#### setConfig(config)
+Set the Jakkel configuration from a json object
+
+```javascript
+// equivalents
+var config = {...};
+acl.setConfig(config);
 ```
 
 ### Development
