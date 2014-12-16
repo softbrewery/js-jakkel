@@ -149,6 +149,27 @@ var state = acl.isAllowed('anonymous', 'auth', '*');
 var state = acl.isAllowed('anonymous', 'auth', ['*']);
 ```
 
+#### ifAllowed(roleName, resourceName, actions, callback)
+Executes the `callback` if the role is allowed to the resource
+- The `roleName` argument is of type String.
+- The `resourceName` argument is of type String.
+- The `actions` argument is optional and of type Array or String.
+- Returns a Promise
+
+```javascript
+// Callback style
+acl.ifAllowed('user', 'products', 'list', function() {
+    ...
+});
+```
+```javascript
+// Promise style
+acl.ifAllowed('user', 'products', 'list')
+    .then(function() {
+        ...
+    });
+```
+
 #### config()
 Return the Jakkel config
 ```javascript
