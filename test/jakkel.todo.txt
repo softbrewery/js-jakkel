@@ -34,3 +34,19 @@ expect(acl.isAllowed('admin', 'auth', 'signup')).toBe(false);
 expect(acl.isAllowed('admin', 'auth', ['login', 'signup'])).toBe(false);
 
 // END OF TESTCASE ##############################################
+
+// START OF TESTCASE ############################################
+
+acl.addRole('anonymous');
+acl.addRole('user', 'anonymous');
+acl.addRole('admin', 'user');
+
+var json = [ 
+  { "role": "anonymous" },
+  { "role": "user", "parent": "anonymous" },
+  { "role": "admin", "parent": "user" }
+];
+
+expect(acl.roles()).toEqual(json);
+
+// END OF TESTCASE ##############################################
