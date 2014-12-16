@@ -221,10 +221,6 @@ var config = {...};
 acl.setConfig(config);
 ```
 
-### Development
----
-### Todo's
----
 ### License
 ---
 MIT
