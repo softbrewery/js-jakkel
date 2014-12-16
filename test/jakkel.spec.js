@@ -37,11 +37,31 @@ describe("Jakkel tests", function() {
     it("should not allow non-strings - number", function() {
       expect(jakkel.addRole( 3.142, null)).toBe(false) ;
     });
+    it("shouldn't allow a role to be added with self as parent", function() {
+      expect(jakkel.addRole("bad", "bad")).toBe(false);
+    });
     it("should allow a role to be added", function() {
-      expect(jakkel.addRole("test", "test")).toBe(true);
+      expect(jakkel.addRole("test", "testadmin")).toBe(true);
+    });
+    it("should allow another role to be added", function() {
+      expect(jakkel.addRole("admin", "administrators")).toBe(true);
     });
   });
- 
+
+  describe("function flush", function () {
+    it("should exist", function() {
+      expect(jakkel.flush).toBeDefined();
+    });
+    it("should clear added roles", function () {
+      jakkel.addRole( 'test1', null );
+      jakkel.flush();
+      expect(jakkel.roles().length).toEqual(0);
+    });
+    xit("should clear added resources", function () {
+      /* expect(jakkel.resources().length).toEqual(0); */
+    });
+  });
+
   describe("function role", function() { 
     it("should exist", function() {
       expect(jakkel.role).toBeDefined();
@@ -51,4 +71,5 @@ describe("Jakkel tests", function() {
       expect(jakkel.role( 'test' )).toEqual( {"role":"test"} );
     });
   });
+
 });

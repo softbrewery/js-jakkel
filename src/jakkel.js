@@ -56,9 +56,13 @@
    */
   Jakkel.prototype.addRole = function(roleName, parent) {
     if ( roleName === null || typeof roleName !== 'string' ||
-         roleName.length === 0 || this.role(roleName)) {
+         roleName.length === 0 || this.role(roleName) ) {
       return false;
     }
+    if ( parent !== null && parent === roleName ) {
+      return false; /* can't be your own parent */
+    };
+
     var new_role = {};
     new_role.role = roleName;
     if ( parent !== null ) {
