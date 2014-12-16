@@ -10,10 +10,10 @@ describe("Jakkel tests", function() {
 
   describe("version property", function() {
     it("should be defined", function() {
-      expect(jakkel.VERSION).to.be.a('string');
+      expect(jakkel.VERSION).toBeDefined();
     });
     it("should not be empty", function() {
-      expect(jakkel.VERSION.length()).to.be.greaterThan(4)
+      expect(jakkel.VERSION.length).not.toBeNull();
     });
   });
     /*
