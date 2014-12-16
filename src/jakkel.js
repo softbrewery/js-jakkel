@@ -40,31 +40,33 @@
     * @return Object
     */
   Jakkel.prototype.role = function(roleName) {
-    for(var r in this._config.roles) {
-      if (r.role === roleName ) {
-        return r;
-      }
-    }
-    return;
-  }
+    var result = null;
+    this._config.roles.forEach( function( role ) {
+      if (role.role === roleName )
+        result = role;
+    }); 
+    return result;
+  };
   
   /* Function:
    * Add role
-   * @param role string
+   * @param roleName string
    * @param parent string
    * @return true on success
    */
   Jakkel.prototype.addRole = function(roleName, parent) {
     if ( roleName === null || typeof roleName !== 'string' ||
-         roleName.length() === 0 || this.role(roleName)) {
+         roleName.length === 0 || this.role(roleName)) {
       return false;
     }
     var new_role = {};
     new_role.role = roleName;
-    new_role.parent = parent;
+    if ( parent !== null ) {
+      new_role.parent = parent;
+    }
     this._config.roles.push(new_role);
     return true;
-  }
+  };
 
 
   //##############################################################
@@ -72,11 +74,13 @@
   /**
    * Clear the contents of an Array
    */
-  /*if ( typeof Array.clear !== 'undefined' ){ */ 
+  /* if (({}).hasOwnPropery.call([],'clear')) { */
+  if (!Array.prototype.hasOwnProperty('clear')) {
     Array.prototype.clear = function() {
       while (this.length > 0) {
         this.pop();
       }
+    }; 
   };
 
   //##############################################################
