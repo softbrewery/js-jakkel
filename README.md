@@ -137,13 +137,13 @@ var state = acl.isAllowed('user', 'products', 'list');
 var state = acl.isAllowed('user', 'products', ['list']);
 ```
 ```javascript
-var state = acl.isAllowed('user', 'products', ['list','detail']);
+var state = acl.isAllowed('admin', 'products', ['list','detail']);
 ```
 ```javascript
 // equivalent
-var state = acl.isAllowed('user', 'auth');
-var state = acl.isAllowed('user', 'auth', '*');
-var state = acl.isAllowed('user', 'auth', ['*']);
+var state = acl.isAllowed('anonymous', 'auth');
+var state = acl.isAllowed('anonymous', 'auth', '*');
+var state = acl.isAllowed('anonymous', 'auth', ['*']);
 ```
 
 #### config()
