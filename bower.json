@@ -9,6 +9,13 @@
       "homepage": "http://softbrewery.com"
     }
   ],
+  "contributors": [ 
+    {
+       "name": "Brian Baker",
+       "email": "brian_e_baker@yahoo.com"
+    }
+  ],
+
   "description": "JavaScript ACL Implementation",
   "main": "dist/jakkel.js",
   "moduleType": [
