@@ -4,7 +4,7 @@
   "description": "JavaScript ACL Implementation",
   "main": "src/jakkel.js",
   "scripts": {
-    "test": "node ./node_modules/karma/bin/karma start",
+    "test": "node ./node_modules/gulp/bin/gulp test",
     "build": "node ./node_modules/gulp/bin/gulp build"
   },
   "repository": {
