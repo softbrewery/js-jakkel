@@ -1,0 +1,36 @@
+// START OF TESTCASE ############################################
+
+// test deny
+acl.addRole('anonymous');
+acl.addRole('user', 'anonymous');
+acl.addRole('admin', 'user');
+acl.addResource('auth', ['login', 'signup', 'logout']);
+acl.allow('anonymous', 'auth', ['login', 'signup']);
+acl.allow('user', 'auth', ['logout']);
+acl.deny('user', 'auth', ['login', 'signup']);
+
+// anonymous can login & signup, but not logout
+expect(acl.isAllowed('anonymous', 'auth', 'login')).toBe(true);
+expect(acl.isAllowed('anonymous', 'auth', 'signup')).toBe(true);
+expect(acl.isAllowed('anonymous', 'auth', ['login', 'signup'])).toBe(true);
+
+expect(acl.isAllowed('anonymous', 'auth')).toBe(false);
+expect(acl.isAllowed('anonymous', 'auth', 'logout')).toBe(false);
+
+// user can logout, but not login or signup
+expect(acl.isAllowed('user', 'auth', 'logout')).toBe(true);
+
+expect(acl.isAllowed('user', 'auth')).toBe(false);
+expect(acl.isAllowed('user', 'auth', 'login')).toBe(false);
+expect(acl.isAllowed('user', 'auth', 'signup')).toBe(false);
+expect(acl.isAllowed('user', 'auth', ['login', 'signup'])).toBe(false);
+
+// admin inherits rights from user
+expect(acl.isAllowed('admin', 'auth', 'logout')).toBe(true);
+
+expect(acl.isAllowed('admin', 'auth')).toBe(false);
+expect(acl.isAllowed('admin', 'auth', 'login')).toBe(false);
+expect(acl.isAllowed('admin', 'auth', 'signup')).toBe(false);
+expect(acl.isAllowed('admin', 'auth', ['login', 'signup'])).toBe(false);
+
+// END OF TESTCASE ##############################################
