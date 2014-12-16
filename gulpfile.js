@@ -3,12 +3,11 @@ var uglify = require('gulp-uglify');
 var jshint = require('gulp-jshint');
 var size = require('gulp-size');
 var rename = require('gulp-rename');
-var rimraf = require('gulp-rimraf');
+var del = require('del');
 var karma = require('gulp-karma');
 
 gulp.task('clean', function() {
-  return gulp.src('dist/', {read: false})
-        .pipe(rimraf());
+  del('dist/');
 });
 
 gulp.task('test', function() {

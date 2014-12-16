@@ -4,7 +4,7 @@
   "description": "JavaScript ACL Implementation",
   "main": "src/jakkel.js",
   "scripts": {
-    "test": "node ./node_modules/gulp/bin/gulp test",
+    "test": "node ./node_modules/karma/bin/karma start",
     "build": "node ./node_modules/gulp/bin/gulp build"
   },
   "repository": {
@@ -24,11 +24,11 @@
   },
   "homepage": "https://github.com/softbrewery/js-jakkel",
   "devDependencies": {
+    "del": "^1.1.0",
     "gulp": "^3.8.10",
     "gulp-jshint": "^1.9.0",
     "gulp-karma": "0.0.4",
     "gulp-rename": "^1.2.0",
-    "gulp-rimraf": "^0.1.1",
     "gulp-size": "^1.1.0",
     "gulp-uglify": "^1.0.1",
     "karma": "^0.12.25",
