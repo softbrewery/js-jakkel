@@ -16,6 +16,40 @@ $ bower install --save js-jakkel
 $ npm install --save js-jakkel
 ```
 
+### How to use
+---
+Jakkel works with Roles and Resources.
+```javascript
+// Create a jakkel instance
+var acl = new Jakkel;
+
+// Define some roles (that inherit each other)
+acl.addRole('anonymous');
+acl.addRole('user', 'anonymous');
+acl.addRole('admin', 'user');
+
+// Define some resources & actions
+acl.addResource('products', ['view', 'add', 'update', 'delete']);
+acl.addResource('comments', ['view', 'add', 'update', 'delete']);
+
+// Set the permissions
+acl.allow('anonymous', 'products', ['view']);
+acl.allow('user', 'comments', ['view', 'add']);
+acl.allow('admin', 'products', ['add', 'update', 'delete']);
+acl.allow('admin', 'comments', ['update', 'delete']);
+
+// Test permissions
+if(acl.isAllowed('user', 'products', ['view'])) {
+    // render products...
+};
+
+// Test permissions
+acl.ifAllowed('admin', 'comments', ['delete'], function() {
+    // show comment delete button
+});
+
+```
+
 ### Api
 ---
 ```javascript
