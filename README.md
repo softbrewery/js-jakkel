@@ -226,6 +226,9 @@ var config = acl.config();
 
 // example contents of config variable
 {
+    "options": [
+        { "strict": true }
+    ],
     "roles": [
         { "name": "anonymous" },
         { "name": "user", "parent": "anonymous" },
