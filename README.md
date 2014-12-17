@@ -273,6 +273,14 @@ acl.setConfig(config);
 ---
 Found a typo or a bug? Send a pull request.
 
+### Todo
+---
+- Add Options (strict,...)
+- Add Strict mode
+- Validate everything instrict mode
+- Prevent roles and actions with the same name in strict mode
+- Prevent roles parents that don't exist
+
 ### License
 ---
 The MIT License (MIT)
