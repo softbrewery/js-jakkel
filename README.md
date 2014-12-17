@@ -154,13 +154,13 @@ var state = acl.isAllowed('anonymous', 'auth', ['*']);
 var state = acl.isAllowed(['user','admin'], 'products', ['list','detail']);
 ```
 
-#### ifAllowed(roleName, resourceName, actions, callbackOnTrue, callbackOnFalse)
+#### ifAllowed(roleName, resourceName, actions, onTrue, onFalse)
 Executes the `callbackOnTrue` method if the role is allowed to the resource, otherwise `callbackOnFalse` is called.
 - The `roleName` argument is of type String or Array of Strings.
 - The `resourceName` argument is of type String.
 - The `actions` argument is optional and of type Array or String.
-- The `callbackOnTrue`argument is of type Function
-- The `callbackOnFalse` argument is optional and of type Function
+- The `onTrue`argument is of type Function (callback)
+- The `onFalse` argument is optional and of type Function (callback)
 
 ```javascript
 acl.ifAllowed('user', 'products', 'list', function() {
