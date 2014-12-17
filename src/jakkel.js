@@ -34,6 +34,14 @@
     return this._config.roles;
   };
 
+  /* Function:
+   * Get resources
+   * @return Array
+   */
+  Jakkel.prototype.resources = function () {
+    return this._config.resources;
+  };
+
    /* Function:
     * Get Role
     * @param roleName
@@ -42,9 +50,23 @@
   Jakkel.prototype.role = function(roleName) {
     var result = null;
     this._config.roles.forEach( function( role ) {
-      if (role.role === roleName )
+      if (role.name === roleName )
         result = role;
     }); 
+    return result;
+  };
+
+  /* Function:
+   * Get resource
+   * @param resourceName
+   * @return Object
+   */
+  Jakkel.prototype.resource = function(resourceName) {
+    var result = null;
+    this._config.resources.forEach( function( resource ) {
+      if ( resource.name === resourceName )
+        result = resource;
+    });
     return result;
   };
   
@@ -61,10 +83,10 @@
     }
     if ( parent !== null && parent === roleName ) {
       return false; /* can't be your own parent */
-    };
+    }
 
     var new_role = {};
-    new_role.role = roleName;
+    new_role.name = roleName;
     if ( parent !== null ) {
       new_role.parent = parent;
     }
@@ -72,6 +94,56 @@
     return true;
   };
 
+  /* Function:
+   * Add a resource
+   * @param resourceName
+   * @return true on success 
+   */
+  Jakkel.prototype.addResource = function(resourceName, opActions) {
+      if ( resourceName === null || typeof resourceName !== 'string' ||
+           resourceName.length === 0 || this.resource(resourceName) ) {
+            //console.log("bailing resourceName parameter error");
+            return false;
+      }
+      if ( arguments.length > 1 ) {
+        if ( ! ( opActions.constructor === Array ||
+                 opActions.constructor === String ) ) {
+          //console.log("opAction unacceptable type (" + typeof opAction +")");
+          return false; 
+        }
+        if ( ( opActions.constructor === Array ) && opActions.length === 0 ) {
+          //console.log("opAction.length:" + opActions.length);
+          return false; /* array should contain something */
+        }
+      }
+
+      var actions_to_add = [];
+      //console.log("typeof opActions", typeof opActions);
+      if ( !opActions ) {
+        //console.log("setting default array");
+        actions_to_add.push( "*" );
+      } else { 
+        if ( typeof opActions === String || typeof opActions === 'string' ) {
+          actions_to_add.push( opActions );
+        } else if ( opActions.constructor === Array ) {
+          actions_to_add = opActions;
+        } else { 
+          console.log("bailing - not an array", typeof opActions);
+          return false;
+        }
+      }
+
+      var new_resource = {};
+      new_resource.name = resourceName;
+      new_resource.actions = []; 
+      actions_to_add.forEach( function( action_name ) {
+        var new_action = { action: action_name };
+        new_resource.actions.push(new_action);
+      });
+
+      this._config.resources.push(new_resource);
+      return true;
+  };
 
   //##############################################################
   
@@ -85,7 +157,7 @@
         this.pop();
       }
     }; 
-  };
+  }
 
   //##############################################################
 
@@ -102,4 +174,4 @@
     }
   }
 
-})(this);
+})(this)
