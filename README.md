@@ -130,7 +130,7 @@ acl.deny('user', 'auth', ['login','signup']);
 
 #### isAllowed(roleName, resourceName, actions)
 Returns true or false depending if the permission is found.
-- The `roleName` argument is of type String.
+- The `roleName` argument is of type String or Array of Strings.
 - The `resourceName` argument is of type String.
 - The `actions` argument is optional and of type Array or String.
 - Return true or false.
@@ -149,35 +149,57 @@ var state = acl.isAllowed('anonymous', 'auth');
 var state = acl.isAllowed('anonymous', 'auth', '*');
 var state = acl.isAllowed('anonymous', 'auth', ['*']);
 ```
+```javascript
+// Array of roles
+var state = acl.isAllowed(['user','admin'], 'products', ['list','detail']);
+```
 
-#### ifAllowed(roleName, resourceName, actions, callback)
-Executes the `callback` if the role is allowed to the resource
-- The `roleName` argument is of type String.
+#### ifAllowed(roleName, resourceName, actions, callbackOnTrue, callbackOnFalse)
+Executes the `callbackOnTrue` method if the role is allowed to the resource, otherwise `callbackOnFalse` is called.
+- The `roleName` argument is of type String or Array of Strings.
 - The `resourceName` argument is of type String.
 - The `actions` argument is optional and of type Array or String.
+- The `callbackOnTrue`argument is of type Function
+- The `callbackOnFalse` argument is optional and of type Function
 
 ```javascript
-// Callback style
 acl.ifAllowed('user', 'products', 'list', function() {
+    // do something if allowed
+});
+```
+```javascript
+acl.ifAllowed('user', 'products', 'list',
+    function() {
+        // do something if allowed
+    },
+    function() {
+        // do something if not allowed
+    }
+);
+```
+```javascript
+// Array of roles
+acl.ifAllowed(['user','admin'], 'products', 'list', function() {
     // do something if allowed
 });
 ```
 
 #### config()
 Return the Jakkel config
+- Returns the config as Json
 ```javascript
 var config = acl.config();
 
 // example contents of config variable
 {
     "roles": [
-        { "role": "anonymous" },
-        { "role": "user", "parent": "anonymous" },
-        { "role": "admin", "parent": "user" }
+        { "name": "anonymous" },
+        { "name": "user", "parent": "anonymous" },
+        { "name": "admin", "parent": "user" }
     ],
     "resources": [
         { 
-            "resource": "auth", 
+            "name": "auth", 
             "actions": [
                 { "action": "login", "allow": ["anonymous"], "deny": ["user"] },
                 { "action": "signup", "allow": ["anonymous"], "deny": ["user"] },
@@ -185,7 +207,7 @@ var config = acl.config();
             ] 
         },
         { 
-            "resource": "products", 
+            "name": "products", 
             "actions": [
                 { "action": "list", "allow": ["user"] },
                 { "action": "detail", "allow": ["user"] },
@@ -193,7 +215,7 @@ var config = acl.config();
             ] 
         },
         { 
-            "resource": "profile", 
+            "name": "profile", 
             "actions": [
                 { "action": "*", "allow": ["user"] }
             ] 
@@ -203,11 +225,13 @@ var config = acl.config();
 ```
 
 #### setConfig(config)
-Set the Jakkel configuration from a json object
-
+Set the Jakkel configuration from a json object.
+- The `config` argument is of type Json.
+- Returns true if succeeded and the config is validated
 ```javascript
 // equivalents
 var config = {...};
+
 acl.setConfig(config);
 ```
 
