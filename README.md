@@ -52,14 +52,23 @@ acl.ifAllowed('admin', 'comments', ['delete'], function() {
 
 ### Api
 ---
+
+#### Jakkel(options)
+Creates a new Jakkel instance
+- The `options` argument is optional and of type Json. 
 ```javascript
+// Without options
 var acl = new Jakkel;
 ```
+```javascript
+// With options
+var acl = new Jakkel( {strict: false} );
+```
 
-#### VERSION
+#### version()
 Returns the library version of JS-Jakkel
 ```javascript
-var version = acl.VERSION;
+var version = acl.version();
 ```
 
 #### roles()
