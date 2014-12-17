@@ -155,7 +155,7 @@ var state = acl.isAllowed(['user','admin'], 'products', ['list','detail']);
 ```
 
 #### ifAllowed(roleName, resourceName, actions, onTrue, onFalse)
-Executes the `callbackOnTrue` method if the role is allowed to the resource, otherwise `callbackOnFalse` is called.
+Executes the callback `onTrue` method if the role is allowed to the resource, otherwise callback `onFalse` is called.
 - The `roleName` argument is of type String or Array of Strings.
 - The `resourceName` argument is of type String.
 - The `actions` argument is optional and of type Array or String.
