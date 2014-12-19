@@ -251,5 +251,67 @@ describe("Jakkel tests", function() {
     });    
   });
 
+
+  describe("function deny", function() {
+    it("should exist", function() {
+      expect(jakkel.deny).toBeDefined();
+    });
+    it("should not work if resource or role hasn't been created", function() {
+      expect(jakkel.deny("user","login")).toEqual( false ); 
+    });
+    it("should not work if resource hasn't been created", function() {
+      jakkel.addRole("user");
+      expect(jakkel.deny("user","login")).toEqual( false ); 
+    });
+    it("should not work if role hasn't been created", function() {
+      jakkel.addResource("config");
+      expect(jakkel.deny("admin","config")).toEqual( false ); 
+    });
+    it("should deny a role for a resource (no action specified)", function() {
+      jakkel.addRole("user");
+      jakkel.addResource("login");
+      expect(jakkel.deny("user","login")).toBe( true );
+    });    
+    it("should deny a role for a resource (no action specified)", function() {
+      jakkel.addRole("user");
+      jakkel.addResource("login");
+      expect(jakkel.deny("user","login")).toBe( true );
+    });    
+    it("should deny a role for a resource (action '*' specified)", function() {
+      jakkel.addRole("user");
+      jakkel.addResource("login");
+      expect(jakkel.deny("user","login",'*')).toBe( true );
+    });    
+    it("should deny a role for a resource (action ['*'] specified)", function() {
+      jakkel.addRole("user");
+      jakkel.addResource("login");
+      expect(jakkel.deny("user","login",'*')).toBe( true );
+    });    
+    it("should deny a role for a resource with one non" +
+        " '*' action (action ['*'] specified)", function() {
+      jakkel.addRole("user");
+      jakkel.addResource("login", "open");
+      expect(jakkel.deny("user","login",'*')).toBe( true );
+    });    
+    it("should deny all roles for a resource with more than one non" +
+        " '*' action (action ['*'] specified)", function() {
+      jakkel.addRole("user");
+      jakkel.addResource("login", [ "open", "close" ]);
+      expect(jakkel.deny("user","login",'*')).toBe( true );
+    });    
+    it("should deny one role for a resource with more than one non" +
+        " '*' action specified)", function() {
+      jakkel.addRole("user");
+      jakkel.addResource("login", [ "open", "close" ]);
+      expect(jakkel.deny("user","login","open")).toBe( true );
+    });    
+    it("should deny more than one role for a resource with more than one non" +
+        " '*' action specified)", function() {
+      jakkel.addRole("user");
+      jakkel.addResource("login", [ "open", "close" ]);
+      expect(jakkel.deny("user","login","open")).toBe( true );
+    });    
+  });
+
 });
 

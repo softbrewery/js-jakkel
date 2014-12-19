@@ -248,7 +248,6 @@
       if ( actions_to_allow === ["*"] && 
            !current_resource_actions.contains("*") ) {
         this._last_error = "tried to use * for resource without *";
-        console.log(this._last_error);
         return false;
       }
     } else {
@@ -257,10 +256,9 @@
       }
     }
 
-    var found_action = null; 
     var _this = this; /* make this available as _this in the foreach scope */
     actions_to_allow.forEach( function( new_allowed ) {
-      found_action = _this._findAction( found_resource, new_allowed );
+      var found_action = _this._findAction( found_resource, new_allowed );
       if ( found_action ) {
         if ( !found_action.allow ) {
           found_action.allow = [ found_role.name ];
@@ -295,7 +293,7 @@
       actions_to_deny = [ "*" ];
     } else if ( typeof opActions === 'string' || 
                 typeof opActions === String ) {
-      actions_to_deny.push( opAction );
+      actions_to_deny.push( opActions );
     } else if ( opActions.constructor === Array ) {
       //console.log("its an Array , going to use it");
       actions_to_deny = opActions;
@@ -303,7 +301,7 @@
       this._last_error = "unexpected type for optional argument";
       return false;
     }
-    var current_resource_actions = this._getResourceActions( found_resource );
+    var current_resource_actions = this._getActionsNames( found_resource );
     if ( this._strict === true ) {
       if ( actions_to_deny === ["*"] && 
            !current_resource_actions.contains("*") ) {
@@ -316,16 +314,19 @@
       }
     }
 
-    var found_action = null; 
     var _this = this; /* make this available as _this in the foreach scope */
-    actions_to_allow.forEach( function( new_allowed ) {
-      found_action = _this._findAction( found_resource, new_allowed );
+    actions_to_deny.forEach( function( new_denied ) {
+      var found_action = _this._findAction( found_resource, new_denied );
       if ( found_action ) {
         if ( !found_action.deny ) {
           found_action.deny = [ found_role.name ];
         } else { 
           found_action.deny.push(found_role.name);
         }
+      }
+      else
+      {
+        _this._last_error = "didn't find an action";
       }
     });
     return true;
