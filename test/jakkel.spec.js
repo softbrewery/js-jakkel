@@ -14,6 +14,13 @@ describe("Jakkel tests", function() {
     });
   });
  
+  describe("version property", function() {
+    it("should be defined", function() {
+      expect(jakkel.version).toBeDefined();
+      expect(jakkel.version()).toEqual(jakkel.VERSION);
+    });
+  });
+
   describe("function roles", function() {
     it("should exist", function() {
       expect(jakkel.roles).toBeDefined();
@@ -110,6 +117,17 @@ describe("Jakkel tests", function() {
       expect(jakkel.resource("test-star-in-array"))
         .toEqual({"name":"test-star-in-array",actions:[{action:'*'}]});
     });
+    it("should allow a resource to be added with multiple actions", function() {
+      multi_actions = ['list', 'detail', 'edit', 'delete', 'update'];
+      expect(jakkel.addResource('products', multi_actions )).toBe(true);
+      resource = jakkel.resource('products');
+      expect(resource).toEqual({ name:'products', 
+                                 actions:[{ action : 'list' }, 
+                                          { action : 'detail' }, 
+                                          { action : 'edit' }, 
+                                          { action : 'delete' }, 
+                                          { action : 'update' }] });
+    });
   });
 
   describe("function flush", function () {
@@ -138,4 +156,100 @@ describe("Jakkel tests", function() {
     });
   });
 
+  describe("array helper function 'contains' ", function () {
+    it("array should have a helper called contains", function () {
+      expect( [].contains ).toBeDefined();
+    });
+    it("should be possible to find a string", function() {
+      var test_array = [ "super", "smashing", "great" ];
+      expect(test_array.contains("super")).toEqual(true);
+      expect(test_array.contains("smashing")).toEqual(true);
+      expect(test_array.contains("bar")).toEqual(false);
+    });
+  });
+
+  
+  describe("private function _findAction", function () {
+    it("should exist", function () {
+      expect(jakkel._findAction).toBeDefined();
+    });
+    it("should be able to find an action in a resource", function () {
+      jakkel.addResource('products', ['list', 'detail', 'edit'] );
+      res = jakkel.resource('products');
+      expect(jakkel._findAction(res, "list")).toEqual({action:'list'});
+    });
+  });
+
+  describe("private function _getActionsNames", function () {
+    it("should exist", function() {
+        expect(jakkel._getActionsNames).toBeDefined();
+    });
+    it("should return an array", function() {
+      jakkel.addResource("test");
+      expect(jakkel._getActionsNames(jakkel.resource("test"))).toEqual(["*"]);
+    });
+  });
+
+  describe("function allow", function() {
+    it("should exist", function() {
+      expect(jakkel.allow).toBeDefined();
+    });
+    it("should not work if resource or role hasn't been created", function() {
+      expect(jakkel.allow("user","login")).toEqual( false ); 
+    });
+    it("should not work if resource hasn't been created", function() {
+      jakkel.addRole("user");
+      expect(jakkel.allow("user","login")).toEqual( false ); 
+    });
+    it("should not work if role hasn't been created", function() {
+      jakkel.addResource("config");
+      expect(jakkel.allow("admin","config")).toEqual( false ); 
+    });
+    it("should allow a role for a resource (no action specified)", function() {
+      jakkel.addRole("user");
+      jakkel.addResource("login");
+      expect(jakkel.allow("user","login")).toBe( true );
+    });    
+    it("should allow a role for a resource (no action specified)", function() {
+      jakkel.addRole("user");
+      jakkel.addResource("login");
+      expect(jakkel.allow("user","login")).toBe( true );
+    });    
+    it("should allow a role for a resource (action '*' specified)", function() {
+      jakkel.addRole("user");
+      jakkel.addResource("login");
+      expect(jakkel.allow("user","login",'*')).toBe( true );
+    });    
+    it("should allow a role for a resource (action ['*'] specified)", function() {
+      jakkel.addRole("user");
+      jakkel.addResource("login");
+      expect(jakkel.allow("user","login",'*')).toBe( true );
+    });    
+    it("should allow a role for a resource with one non" +
+        " '*' action (action ['*'] specified)", function() {
+      jakkel.addRole("user");
+      jakkel.addResource("login", "open");
+      expect(jakkel.allow("user","login",'*')).toBe( true );
+    });    
+    it("should allow all roles for a resource with more than one non" +
+        " '*' action (action ['*'] specified)", function() {
+      jakkel.addRole("user");
+      jakkel.addResource("login", [ "open", "close" ]);
+      expect(jakkel.allow("user","login",'*')).toBe( true );
+    });    
+    it("should allow one role for a resource with more than one non" +
+        " '*' action specified)", function() {
+      jakkel.addRole("user");
+      jakkel.addResource("login", [ "open", "close" ]);
+      expect(jakkel.allow("user","login","open")).toBe( true );
+    });    
+    it("should allow more than one role for a resource with more than one non" +
+        " '*' action specified)", function() {
+      jakkel.addRole("user");
+      jakkel.addResource("login", [ "open", "close" ]);
+      expect(jakkel.allow("user","login","open")).toBe( true );
+    });    
+  });
+
 });
+
