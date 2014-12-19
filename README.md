@@ -80,7 +80,7 @@ var roles = acl.roles();
 ```
 
 #### role(roleName)
-Returns a role of the currently defined roles list. 
+Returns a role from the currently defined roles. 
 - The `name` argument is of type String. 
 - Return type is a Role object.
 
@@ -89,7 +89,7 @@ var role = acl.role('admin');
 ```
 
 #### addRole(roleName, parent)
-Adds a role the the list of roles.
+Adds a role to the roles.
 - The `name` argument is of type String. 
 - The `parent` argument is optional and of type String. 
 - Returns true if succeeded.
@@ -108,7 +108,7 @@ var resources = acl.resources();
 ```
 
 #### resource(resourceName)
-Returns a resource of the currently defined resources list. 
+Returns a resource from the currently defined resources. 
 - The `resourceName` argument is of type String. 
 - Return type is a Resource object.
 
@@ -117,7 +117,7 @@ var resource = acl.resource('products');
 ```
 
 #### addResource(resourceName, actions)
-Adds a resources the the list of resources. Actions are optional but can be used to have more control.
+Adds a resources to the resources. Actions are optional but can be used to have more control.
 - The `resourceName` argument is of type String. 
 - The `actions` argument is optional and of type String or Array. 
 - Returns true if succeeded.
@@ -289,9 +289,11 @@ Found a typo or a bug? Send a pull request.
 ---
 - Add Options (strict,...)
 - Add Strict mode
-- Validate everything instrict mode
-- Prevent roles and actions with the same name in strict mode
-- Prevent roles parents that don't exist
+    - Validate everything in strict mode
+    - Prevent roles and actions with the same name in strict mode
+    - Prevent adding a role if name is already used for a resource.
+    - Prevent adding a resource if name is already used for a role.
+    - Prevent adding a role if specified parent doesn't exist.
 
 ### License
 ---
