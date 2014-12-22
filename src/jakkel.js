@@ -10,9 +10,11 @@
     this._strict = false;
     this._last_error = "";
     this._log_errors = true;
+    this.explanation = "";
+    this._explain = true;
     if ( opOptions ) {
       if ( opOptions.strict === true ) {
-        this.strict = true;
+        this._strict = true;
       }
     }
     this._config = {
@@ -98,7 +100,7 @@
       this._last_error = "argument type";
       return false;
     }
-    if ( this._strict === true && resource(roleName) !== null ) {
+    if ( this._strict === true && this.resource(roleName) !== null ) {
       this._last_error = "strict disallows shared names";
       return false;
     }  
@@ -127,7 +129,7 @@
         this._last_error = "argument type or reuse";
         return false;
       }
-      if ( this.strict === true && role(resourceName) !== null ) {
+      if ( this._strict === true && this.role(resourceName) !== null ) {
         this._last_error = "strict disallows shared names";
         return false;
       }  
@@ -169,11 +171,16 @@
       return true;
   };
   /* Function:
-   * <desc>
-   * @param
-   * @return 
+   * _findAction 
+   * @param resource_rec, resource object as return by resource function
+   *        action_name, name of action we're interested in
+   * @return action record - { name: allow: [], deny [] }
    */
   Jakkel.prototype._findAction = function( resource_rec, action_name ) {
+    if ( resource_rec.constructor === Array || 
+         action_name.constructor === Array ) {
+      return null;
+    }
     if ( !(typeof resource_rec === Object || 
             typeof resource_rec === 'object') ) {
       //console.log("unexpected type, res is ", typeof resource_rec );
@@ -216,13 +223,34 @@
   };
 
   /* Function:
+   * _opActionsForAllowDeny
+   * @param opActions
+   * @return array 
+   */
+  Jakkel.prototype._opActionsForAllowDeny = function( opActions ) {
+    var actions = [];
+    if ( !opActions ) {
+      actions = [ "*" ];
+    } else if ( typeof opActions === 'string' || 
+                typeof opActions === String ) {
+      actions.push( opActions );
+    } else if ( opActions.constructor === Array ) {
+      actions = opActions;
+    } else { /* unexpect type for opActions */
+      this._last_error = "unexpected type for optional argument";
+      return null;
+    }
+    return actions;
+  };
+
+  /* Function:
    * allow
    * @param roleName role which is going to be allowed access to resource 
    * @param resourceName name of resource to which role with be allowed
    * @param opActions - actions for resource which role is to be allowed
    *                    can be ommitted for 'all', a string for a single
    *                    action, or an array for multiple actions.
-   * @return 
+   * @return true on success
    */
   Jakkel.prototype.allow = function(roleName, resourceName, opActions) {
     var actions_to_allow = [];
@@ -232,27 +260,20 @@
       this._last_error = "unknown role/resource";
       return false;
     }
-    if ( !opActions ) {
-      actions_to_allow = [ "*" ];
-    } else if ( typeof opActions === 'string' || 
-                typeof opActions === String ) {
-      actions_to_allow.push( opActions );
-    } else if ( opActions.constructor === Array ) {
-      actions_to_allow = opActions;
-    } else { /* unexpect type for opActions */
-      this._last_error = "unexpected type for optional argument";
+    actions_to_allow = this._opActionsForAllowDeny( opActions );
+    if (!actions_to_allow) {
       return false;
-    }
-    var current_resource_actions = this._getActionsNames( found_resource );
+    }     
     if ( this._strict === true ) {
-      if ( actions_to_allow === ["*"] && 
-           !current_resource_actions.contains("*") ) {
+      if ( actions_to_allow.contains("*") && 
+           !this._getActionsNames( found_resource ).contains("*") ) {
         this._last_error = "tried to use * for resource without *";
         return false;
       }
-    } else {
+    } 
+    if ( !this._strict || this._strict === false ) {
       if ( actions_to_allow === [ "*" ] ) {
-        actions_to_allow = current_resource_actions;
+        actions_to_allow = this._getActionsNames( found_resource );
       }
     }
 
@@ -278,7 +299,7 @@
    * @param opActions - actions for resource which role is to be denied
    *                    can be ommitted for 'all', a string for a single
    *                    action, or an array for multiple actions.
-   * @return 
+   * @return true on success
    */
   Jakkel.prototype.deny = function(roleName, resourceName, opActions) {
     var actions_to_deny = [];
@@ -289,28 +310,20 @@
       this._last_error = "unknown role/resource";
       return false;
     }
-    if ( !opActions ) {
-      actions_to_deny = [ "*" ];
-    } else if ( typeof opActions === 'string' || 
-                typeof opActions === String ) {
-      actions_to_deny.push( opActions );
-    } else if ( opActions.constructor === Array ) {
-      //console.log("its an Array , going to use it");
-      actions_to_deny = opActions;
-    } else { /* unexpect type for opActions */
-      this._last_error = "unexpected type for optional argument";
+    actions_to_deny = this._opActionsForAllowDeny( opActions );
+    if (!actions_to_deny) {
       return false;
-    }
-    var current_resource_actions = this._getActionsNames( found_resource );
+    }     
     if ( this._strict === true ) {
       if ( actions_to_deny === ["*"] && 
-           !current_resource_actions.contains("*") ) {
+           !this._getActionsNames( found_resource ).contains("*") ) {
         this._last_error = "tried to use * for resource without *";
         return false;
       }
-    } else {
+    } 
+    if ( !this._strict || this._strict === false ) {
       if ( actions_to_deny === [ "*" ] ) {
-        actions_to_deny = current_resource_actions;
+        actions_to_deny = this._getActionsNames( found_resource );
       }
     }
 
@@ -332,6 +345,139 @@
     return true;
   };
 
+  /* Function:
+   * _isAllowed private implementation - no parameter checking
+   * @param role - a role object
+   *        resource - a resource object
+   *        actions - array of actions to check
+   * @return "deny", "allow", "default"
+   */
+  Jakkel.prototype._isAllowed = function( role, resource, actions ) {
+    var result="default";
+    var actions_to_check = null;
+    var wild_card = false;
+
+    // console.log("_isAllowed called", role, resource, actions);
+
+    if ( this._expand_wildcard_in_allow_query && actions === ["*"] ) {
+      actions_to_check = this._getActionNames(resource);
+      console.log("wildcard expansion for actions", actions_to_check );
+      wild_card = true;
+    } else { 
+      actions_to_check = actions;
+    }
+    var _this = this;
+    //console.log("resource actions", resource.actions );
+    resource.actions.forEach( function( action ) {
+      //console.log("checking action ", action );
+      //console.log("atc ", actions_to_check);
+      //console.log("action.action ", action.action);
+      if ( actions_to_check.contains( action.action )) {
+        //console.log( action.action, "is in", actions_to_check );
+        /* if we have not expanded a wild card then allow is overriden by
+         * deny, so check allow first */
+        if ( wild_card === false ) {
+          //console.log("wildcard false");
+          if ( action.allow && action.allow.contains( role.name )) {
+            //console.log("action.allow.contains role.name");
+            if ( _this._explain === true ) { 
+              _this.explanation = "allowed " + role.name + 
+                                 " for action " + action.action;
+            }
+            result = "allow";
+          }
+        }
+        if (action.deny && action.deny.contains( role.name )) {
+          //console.log("action.deny.contains role.name");
+          if ( _this._explain ) { 
+            _this.explanation = "denied " + role.name + 
+                               " for action " + action.action;
+          }
+          result = "denied";
+        } 
+        /* if we have expanded a wild card then deny is overriden by allow
+         * so check allow after deny */
+        if ( wild_card === true ) {
+          //console.log("wildcard false");
+          if (action.allow && action.allow.contains( role.name )) {
+            //console.log("action.allow.contains role.name");
+            if ( _this._explain ) { 
+              _this.explanation = "allowed " + role.name + 
+                                 " for action " + action.action;
+              //console.log(_this.explanation);
+            }
+            result = "allow";
+          }
+        }
+      }
+    });    
+    while ( result === "default" && role.parent ) {
+      var parent_role = this.role(role.parent);
+      result = this._isAllowed( parent_role, resource, actions );
+    }
+    return result;
+  };
+
+
+  /* Function:
+   * isAllowed
+   * @param roleName
+   *        resourceName
+   *        actions
+   * @return 
+   */
+  Jakkel.prototype.isAllowed = function( roleNames, resourceName, opActions ) {
+    var result;
+    var ret_val;
+    var actions = [];
+    var roles = null;
+    var found_role = null;
+    var found_resource = this.resource(resourceName);
+    if ( found_resource === null ) {
+      this._last_error = "unknown resource";
+      return false;
+    }
+    if (roleNames.constructor === Array && roleNames.length < 1 ) { 
+      this._last_error = "isAllowed - no roles specified";
+      return false;
+    }
+    if ( typeof roleNames === String || typeof roleNames === 'string') {
+      roles = [ roleNames ];
+    } else {
+      roles = roleNames;
+    }
+    //console.log( roles );
+    
+    actions = this._opActionsForAllowDeny( opActions );
+    //console.log( actions );
+    if (actions.length === 0) {
+      this._last_error = "isAllowed - zero length actions - return false";
+      return false;
+    }     
+    /* each role can have different parentage so do each in turn */
+    var _this = this; /* make this available as _this for forEach */
+    roles.forEach( function( roleName ) {
+      found_role = _this.role( roleName );
+      //console.log( found_role, "is found role" ); 
+      ret_val = _this._isAllowed( found_role, found_resource, actions);
+      //console.log(_this.explanation);
+      if ( ret_val === "allow" ) {
+        //console.log( "isAllowed allow" );
+        result = true;
+      } else if ( ret_val === "deny" ) {
+        //console.log( "isAllowed deny" );
+        result = false;
+      } else if ( ret_val === "default" && this._default ) {
+        //console.log( "isAllowed using default", this._default === true ? 'true' : 'false' );
+        result = this._default;
+      } else {
+        //console.log( "isAllow returning false" );
+        result = false;
+      }  
+    });
+    return result; 
+  }; 
+
   //##############################################################
   
   /**
@@ -347,13 +493,11 @@
   }
   if (!Array.prototype.hasOwnProperty('contains')) {
     Array.prototype.contains = function( to_find ) {
-      var i;
-      for ( i = 0; i < this.length; i += 1 ) {
-        if ( this[i] === to_find ) {
-          return true;
-        }
+      if ( this.indexOf(to_find ) > -1 ) {
+        return true;
+      } else {
+        return false;
       }
-      return false;
     };
   }
 

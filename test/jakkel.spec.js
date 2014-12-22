@@ -14,7 +14,7 @@ describe("Jakkel tests", function() {
     });
   });
  
-  describe("version property", function() {
+  describe("version function", function() {
     it("should be defined", function() {
       expect(jakkel.version).toBeDefined();
       expect(jakkel.version()).toEqual(jakkel.VERSION);
@@ -97,6 +97,9 @@ describe("Jakkel tests", function() {
     it("should not allow empty array for actions", function() {
       expect(jakkel.addResource( 'failtest', [] )).toBe(false);
     });
+    it("should not allow object for actions", function() {
+      expect(jakkel.addResource( 'failtest', {} )).toBe(false);
+    });
     it("should allow a resource to be add with no actions specifed, and get default", function() {
       expect(jakkel.addResource('test')).toBe(true);
       expect(jakkel.resource("test"))
@@ -173,6 +176,9 @@ describe("Jakkel tests", function() {
     it("should exist", function () {
       expect(jakkel._findAction).toBeDefined();
     });
+    it("should reject bad arguments", function() {
+      expect(jakkel._findAction( [], [] )).toEqual(null);
+    });
     it("should be able to find an action in a resource", function () {
       jakkel.addResource('products', ['list', 'detail', 'edit'] );
       res = jakkel.resource('products');
@@ -187,6 +193,21 @@ describe("Jakkel tests", function() {
     it("should return an array", function() {
       jakkel.addResource("test");
       expect(jakkel._getActionsNames(jakkel.resource("test"))).toEqual(["*"]);
+    });
+  });
+
+  describe("private function _opActionsForAllowDeny", function () {
+    it("should exist", function() {
+      expect(jakkel._opActionsForAllowDeny).toBeDefined();
+    });
+    it("should create an array with one entry '*' given no argument", function() {
+      expect(jakkel._opActionsForAllowDeny()).toEqual(["*"]);
+    });
+    it("should create an array with one entry 'test' given 'test' as argument", function() {
+      expect(jakkel._opActionsForAllowDeny("test")).toEqual(["test"]);
+    });
+    it("should create an array with two entries 'test', 'string' given  ['test', 'string'] as argument", function() {
+      expect(jakkel._opActionsForAllowDeny(["test","string"])).toEqual(["test","string"]);
     });
   });
 
@@ -312,6 +333,90 @@ describe("Jakkel tests", function() {
       expect(jakkel.deny("user","login","open")).toBe( true );
     });    
   });
+  describe("function isAllowed", function() {
+    it("should exist", function() {
+      expect(jakkel.deny).toBeDefined();
+    });
+    it("should reject bad arguments", function() {
+      expect(jakkel.isAllowed("foo", "bar" )).toBe(false);
+      jakkel.addRole("foo");
+      expect(jakkel.isAllowed("foo", "bar" )).toBe(false);
+      expect(jakkel.isAllowed([], "bar" )).toBe(false);
+      expect(jakkel.isAllowed(["foo", "bar"], "bar" )).toBe(false);
+    });
+    it("should return true for an allowed resource",  function() {
+      jakkel.addRole("user");
+      jakkel.addResource("login");
+      jakkel.allow("user","login");
+      jakkel._last_error = null;
+      expect(jakkel.isAllowed("user", "login")).toBe( true );
+      //console.log( jakkel.explanation );
+    });
+    it("should return true for an allowed resource action, 1 role",  function() {
+      jakkel.addRole("user");
+      jakkel.addResource("auth", [ "login", "logout" ]);
+      jakkel.allow("user", "auth",  "login");
+      expect(jakkel.isAllowed("user", "auth", "login")).toBe( true );
+      //console.log( jakkel.explanation );
+    });
+    xit("should return true for an allowed resource action, 2 roles - depends on order :(",  function() {
+      jakkel.addRole("user");
+      jakkel.addRole("admin");
+      jakkel.addResource("auth", [ "login", "logout" ]);
+      jakkel.allow("user", "auth",  "login");
+      jakkel.allow("admin", "auth", "logout");
+      expect(jakkel.isAllowed(["admin","user"], "auth", "login")).toBe( true );
+      //console.log( jakkel.explanation );
+    });
+    it("should return true for an allowed resource action of a parent ",  function() {
+      jakkel.addRole("user");
+      jakkel.addRole("admin", "user");
+      jakkel.addResource("auth", [ "login", "logout" ]);
+      jakkel.allow("user", "auth",  "login");
+      //jakkel.allow("admin", "auth", "logout");
+      expect(jakkel.isAllowed("admin", "auth", "login")).toBe( true );
+      //console.log( jakkel.explanation );
+    });
+    it("should return true for a general resource of a parent ",  function() {
+      jakkel.addRole("user");
+      jakkel.addRole("admin", "user");
+      jakkel.addResource("auth");
+      jakkel.allow("user", "auth");
+      //jakkel.allow("admin", "auth", "logout");
+      expect(jakkel.isAllowed("admin", "auth")).toBe( true );
+      //console.log( jakkel.explanation );
+    });
+    it("should return true for a general resource of a parent's parent ",  function() {
+      jakkel.addRole("user");
+      jakkel.addRole("admin", "user");
+      jakkel.addRole("god", "admin" );
+      jakkel.addResource("auth");
+      jakkel.allow("user", "auth");
+      //jakkel.allow("admin", "auth", "logout");
+      expect(jakkel.isAllowed("god", "auth")).toBe( true );
+      //console.log( jakkel.explanation );
+    });
+  });
 
+  describe("strict true checks", function() {
+    config = { strict: true };
+    strict = new Jakkel( config );
+    it("should be turned on using config at creation", function() {
+      expect(strict._strict).toBe(true);
+    });
+    strict.flush();
+    it("should prevent duplicate names for roles and resources", function() {
+      strict.addRole("foo");
+      strict.addResource("bar");
+      expect(strict.addRole("bar")).toBe(false);
+      expect(strict.addResource("foo")).toBe(false);
+    });
+    strict.flush();
+    it("should prevent allowing default ('*') on resource with ('*') as an action ", function() {
+      strict.addRole("foo");
+      strict.addResource("buz", "bing");
+      expect(strict.allow("foo", "buz")).toBe(false);
+    });
+  });
 });
 
