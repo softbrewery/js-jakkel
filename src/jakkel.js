@@ -337,7 +337,6 @@
   /**
    * Clear the contents of an Array
    */
-  /* if (({}).hasOwnPropery.call([],'clear')) { */
   if (!Array.prototype.hasOwnProperty('clear')) {
     Array.prototype.clear = function() {
       while (this.length > 0) {
