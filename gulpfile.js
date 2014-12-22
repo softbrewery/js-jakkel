@@ -23,6 +23,7 @@ gulp.task('test', function() {
 
 gulp.task('build', ['clean', 'test'], function() {
   return gulp.src('src/**/*.js')
+    .pipe(size({title: 'before build'}))
     .pipe(jshint())
     .pipe(jshint.reporter('default'))
     .pipe(rename('jakkel.js'))
@@ -30,7 +31,7 @@ gulp.task('build', ['clean', 'test'], function() {
     .pipe(uglify())
     .pipe(rename('jakkel.min.js'))
     .pipe(gulp.dest('dist/'))
-    .pipe(size());
+    .pipe(size({title: 'after build'}));
 });
 
 gulp.task('default', function() {
