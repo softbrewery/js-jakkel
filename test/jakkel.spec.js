@@ -7,17 +7,17 @@ describe("Jakkel tests", function() {
 
   describe("version property", function() {
     it("should be defined", function() {
-      expect(jakkel.VERSION).toBeDefined();
+      expect(jakkel._VERSION).toBeDefined();
     });
     it("should not be empty", function() {
-      expect(jakkel.VERSION.length).not.toBeNull();
+      expect(jakkel._VERSION.length).not.toBeNull();
     });
   });
  
   describe("version function", function() {
     it("should be defined", function() {
       expect(jakkel.version).toBeDefined();
-      expect(jakkel.version()).toEqual(jakkel.VERSION);
+      expect(jakkel.version()).toEqual(jakkel._VERSION);
     });
   });
 

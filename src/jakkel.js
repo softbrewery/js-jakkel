@@ -26,7 +26,7 @@
   /*
    * Current version.
    */
-  Jakkel.prototype.VERSION = '0.0.2';
+  Jakkel.prototype._VERSION = '0.0.2';
 
    /* Function:
     * Flush the config, used for testing. 
@@ -41,7 +41,7 @@
     * @return version string
     */
    Jakkel.prototype.version = function() {
-     return this.VERSION;
+     return this._VERSION;
    };
 
    /* Function:
@@ -483,6 +483,7 @@
   /**
    * Clear the contents of an Array
    */
+  /* if (({}).hasOwnPropery.call([],'clear')) { */
   if (!Array.prototype.hasOwnProperty('clear')) {
     Array.prototype.clear = function() {
       while (this.length > 0) {
