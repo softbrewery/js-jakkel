@@ -1,6 +1,40 @@
 describe("Jakkel tests", function() {
   var jakkel = new Jakkel();
 
+  var valid_config = '{\
+      "options": [\
+          { "strict": true }\
+      ],\
+      "roles": [\
+        { "name": "anonymous" },\
+        { "name": "user", "parent": "anonymous" },\
+        { "name": "admin", "parent": "user" }\
+      ],\
+      "resources": [\
+          { \
+            "name": "auth", \
+            "actions": [\
+                { "action": "login", "allow": ["anonymous"], "deny": ["user"] },\
+                { "action": "signup", "allow": ["anonymous"], "deny": ["user"] },\
+                { "action": "logout", "allow": ["user"] }\
+            ] \
+          },\
+          { \
+             "name": "products", \
+             "actions": [\
+                 { "action": "list", "allow": ["user"] },\
+                 { "action": "detail", "allow": ["user"] },\
+                 { "action": "add", "allow": ["admin"] }\
+             ] \
+          },\
+          { \
+             "name": "profile", \
+             "actions": [\
+                 { "action": "*", "allow": ["user"] }\
+             ] \
+          }\
+        ] }'; /* from examples in readme.md */
+
   beforeEach(function() {
     jakkel.flush();
   });
@@ -455,17 +489,29 @@ describe("Jakkel tests", function() {
     it("should exist", function () {
       expect(jakkel.ifAllowed).toBeDefined();
     });
-    xit("should be able to take three argument", function () {
-      expect(jakkel.ifAllowed("test", "test", null ));
+    it("should be able to take three arguments", function () {
+      expect(jakkel.ifAllowed("test", "test", null)).toBe(undefined);
     });
-    xit("should be able to take four argument, no actions ", function () {
-      expect(jakkel.ifAllowed("test", "test", null, null));
+    it("should be able to take four argument, no actions ", function () {
+      var allowed = jasmine.createSpy();
+      var denied = jasmine.createSpy();
+      expect(jakkel.ifAllowed("test", "test", allowed, denied)).toBe(undefined);
+      expect(denied.calls.length === 1);
     });
-    xit("should be able to take four argument, no denied function ", function () {
-      expect(jakkel.ifAllowed("test", "test", "test", null));
+    it("should be able to take four argument, no denied function ", function () {
+      var allowed = jasmine.createSpy();
+      expect(jakkel.ifAllowed("test", "test", "test", allowed)).toBe(undefined);
     });
-    xit("should be able to take five argument", function () {
-      expect(jakkel.ifAllowed("test", "test", "test", null, null));
+    it("should be able to take five argument", function () {
+      var allowed = jasmine.createSpy();
+      var denied = jasmine.createSpy();
+      expect(jakkel.ifAllowed("test", "test", "test", null, null)).toBe(undefined);
+      expect(denied.calls.length === 1);
+    });
+    it("When using three arguments, should not call the callback with no access control set up", function () {
+      var allowed = jasmine.createSpy();
+      jakkel.ifAllowed("test", "test", allowed );
+      expect(allowed.calls.length === 0);
     });
   });
 
@@ -473,7 +519,7 @@ describe("Jakkel tests", function() {
     config = { strict: true };
     strict = new Jakkel( config );
     it("should be turned on using config at creation", function() {
-      expect(strict._strict).toBe(true);
+      expect(strict._config.options["strict"]).toBe(true);
     });
     strict.flush();
     it("should prevent duplicate names for roles and resources", function() {
@@ -516,6 +562,41 @@ describe("Jakkel tests", function() {
     it("should report 'not available' if these is no error", function() {
       jakkel._last_error = "";
       expect(jakkel.getLastError()).toEqual("not available");
+    });
+  });
+
+  describe("function config", function() {
+    it("should exist", function() {
+      expect(jakkel.config()).toBeDefined();
+    });
+    it("should produce 'null' output when there is no config", function() {
+      expect(jakkel.config()).toEqual('{\n    "options": [],\n    "roles": [],\n    "resources": []\n}');
+    });
+  });
+  describe("function setConfig", function() {
+    it("should exist", function() {
+      expect(jakkel.setConfig()).toBeDefined();
+    });
+    it("should return false if there is something wrong with the supplied config", function() {
+      expect(jakkel.setConfig("wrong input")).toBe(false);
+    });
+    it("should return false if fields are missing in the supplied config", function() {
+      expect(jakkel.setConfig('{}')).toBe(false);
+    });
+    it("should return false if options field is missing in the supplied config", function() {
+      expect(jakkel.setConfig('{"roles": [], "resources": []}')).toBe(false);
+    });
+    it("should return false if roles field missing in the supplied config", function() {
+      expect(jakkel.setConfig('{"options": [], "resources": []}')).toBe(false);
+    });
+    it("should return false if resources field is missing in the supplied config", function() {
+      expect(jakkel.setConfig('{"options": [], "roles": []}')).toBe(false);
+    });
+    it("should return true if given a valid config", function() {
+      expect(jakkel.setConfig('{"options": [], "roles": [], "resources": []}')).toBe(true);
+    });
+    it("should return true if given valid_config", function() {
+      expect(jakkel.setConfig(valid_config)).toBe(true);
     });
   });
 });

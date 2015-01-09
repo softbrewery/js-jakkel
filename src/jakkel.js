@@ -7,7 +7,12 @@
    * Creat the Jakkel Object
    */
   var Jakkel = function( opOptions ) {
-    this._strict = false;
+    this._config = {
+      options: [],
+      roles: [],
+      resources: []
+    };
+    this._config.options["strict"] = false;
     this._last_error = "";
     this._log_errors = true;
     this.explanation = "";
@@ -16,13 +21,10 @@
     this._expand_wildcard_in_isallowed = false;
     if ( opOptions ) {
       if ( opOptions.strict === true ) {
-        this._strict = true;
+        this._config.options["strict"] = true;
       }
     }
-    this._config = {
-      roles: [],
-      resources: []
-    };
+    this._strict = this._config.options["strict"];
   };
 
   /*
@@ -374,6 +376,10 @@
     return this._updateAction( "deny", roleName, resourceName, opActions);
   };
 
+  Jakkel.prototype._actionHas = function( action, allowOrDeny, roleName ) {
+    return action[allowOrDeny].contains(roleName);
+  };
+
   /* Function:
    * _isAllowed private implementation - no parameter checking - recurses.
    * @param role - a role object
@@ -393,31 +399,25 @@
       actions_to_check = actions;
     }
     var _this = this;
+    if (wild_card) {
+      /* if we have not expanded a wild card then allow is overriden by
+       * deny, so check allow first */
+      var first_check="deny";
+      var second_check="allow";
+    } else { 
+      var first_check="allow";
+      var second_check="deny";
+    }
     resource.actions.forEach( function( action ) {
       if ( actions_to_check.contains( action.action )) {
-        /* if we have not expanded a wild card then allow is overriden by
-         * deny, so check allow first */
-        if ( wild_card === false ) {
-          if ( action.allow && action.allow.contains( role.name )) {
-            _this._setExplanation( "allowed " + role.name + 
-                                 " for action " + action.action );
-            result = "allow";
-          }
+        if ( _this._actionHas(action, first_check, role.name )) {
+          result = first_check;
         }
-        if (action.deny && action.deny.contains( role.name )) {
-          _this._setExplanation(  "denied " + role.name + 
-                               " for action " + action.action);
-          result = "denied";
-        } 
-        /* if we have expanded a wild card then deny is overriden by allow
-         * so check allow after deny */
-        if ( wild_card === true ) {
-          if (action.allow && action.allow.contains( role.name )) {
-            _this._setExplanation ( "allowed " + role.name + 
-                                 " for action " + action.action );
-            result = "allow";
-          }
+        if ( _this._actionHas(action, second_check, role.name )) {
+          result = second_check;
         }
+        _this._setExplanation( result + " " + role.name + 
+                              " for action " + action.action );
       }
     });    
     while ( result === "default" && role.parent ) {
@@ -500,20 +500,22 @@
     var actual_opActions = null;
     var actual_denied = null;
     var allowed_result = null;
-    if ( Arguments.length === 3 ) {
+    if ( arguments.length === 3 ) {
       actual_function = opActions;
-    } else if ( Arguments.length === 4 ) {     
+    } else if ( arguments.length === 4 ) {     
       /* with four arguments we have one of two possibilities */
+      /* roleName, resourceName, allowedFunction, deniedFunction */
       if ( typeof opActions === 'function' ) {
         actual_function = opActions;
         actual_denied = allowedFunction;
       } else if ( opActions.constructor === 'Array' || 
                   typeof opActions === String ||
                   typeof opActions === 'string' ) {
+      /* roleName, resourceName, actions allowedFunction */
         actual_opActions = opActions;
         actual_function = allowedFunction;
       }
-    } else if ( Arguments.length === 5 ) {
+    } else if ( arguments.length === 5 ) {
         actual_opActions = opActions;
         actual_function = allowedFunction;
         actual_denied = opDeniedFunction;
@@ -524,18 +526,59 @@
      * don't have a meaningful function to call 
      */
     allowed_result = 
-          this.isAllowed( roleName, resourceName, actual_opActions); 
+          this.isAllowed( roleNames, resourceName, actual_opActions); 
     if (typeof actual_function === 'function' ) {
       if ( allowed_result ) {
         return actual_function();
       } else {
         if ( typeof actual_denied === 'function' ) {
-          return opDeniedFunction();
+          return actual_denied();
         }
       }
     }
   };
 
+  /* Function:
+   * Generate JSON description of present config
+   * @return JSON stringification of present config
+   */
+  Jakkel.prototype.config = function() {
+    return JSON.stringify( this._config, null, 4 );
+  };
+
+  /* Function:
+   * Import a JSON string as new config
+   * @param
+   * @return 
+   */
+  Jakkel.prototype.setConfig = function( newConfig ) {
+    var success = true;
+    try {
+      var that = JSON.parse( newConfig );
+      if ( that.options !== undefined && 
+           that.roles !== undefined && that.resources !== undefined ) {
+        this.options = that.options;
+        this.roles = that.roles;
+        this.resources = that.resources;
+      }
+      else
+      {
+        if (!that.options) {
+          throw "options missing";
+        }
+        if (!that.roles) {
+          throw "roles missing";
+        }
+        if (!that.resources) {
+          throw "resources missing";
+        }
+      }
+    }
+    catch(err) {
+      success = false
+    }
+    return success;
+  }; 
   /**
    * Clear the contents of an Array
    */
