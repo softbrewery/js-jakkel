@@ -1,6 +1,6 @@
 describe("Jakkel tests", function() {
   var jakkel = new Jakkel();
-
+  /*jshint multistr: true */
   var valid_config = '{\
       "options": [\
           { "strict": true }\
@@ -106,9 +106,9 @@ describe("Jakkel tests", function() {
       expect(jakkel.resource).toBeDefined();
     });
     /* internals have changed slightly - need to revisit this test */
-    xit("should return a previously added resource", function() {
+    it("should return a previously added resource", function() {
       expect(jakkel.addResource("test", "*")).toBe(true);
-      expect(jakkel.resource("test")).name.toEqual("test");
+      expect(jakkel.resource("test").name).toEqual("test");
     });
   });
 
@@ -146,28 +146,29 @@ describe("Jakkel tests", function() {
     });
 
     /* internals have changed slightly - need to revisit this test */
-    xit("should allow a resource to be added with * action", function() {
+    it("should allow a resource to be added with * action", function() {
       expect(jakkel.addResource("test-star", "*")).toBe(true);
+      //console.log(jakkel.resource("test"));
       expect(jakkel.resource("test-star"))
-        .toEqual({"name":"test-star",actions:[{action:'*'}]});
+        .toEqual({"name":"test-star",actions:[{action:'*', allow:[], deny: [] }]});
     });
     /* internals have changed slightly - need to revisit this test */
-    xit("should allow a resource to be added with ['*'] action", function() {
+    it("should allow a resource to be added with ['*'] action", function() {
       expect(jakkel.addResource("test-star-in-array", ['*'] )).toBe(true);
       expect(jakkel.resource("test-star-in-array"))
-        .toEqual({"name":"test-star-in-array",actions:[{action:'*'}]});
+        .toEqual({"name":"test-star-in-array",actions:[{action:'*', allow: [], deny: [] }]});
     });
     /* internals have changed slightly - need to revisit this test */
-    xit("should allow a resource to be added with multiple actions", function() {
+    it("should allow a resource to be added with multiple actions", function() {
       multi_actions = ['list', 'detail', 'edit', 'delete', 'update'];
       expect(jakkel.addResource('products', multi_actions )).toBe(true);
       resource = jakkel.resource('products');
       expect(resource).toEqual({ name:'products', 
-                                 actions:[{ action : 'list' }, 
-                                          { action : 'detail' }, 
-                                          { action : 'edit' }, 
-                                          { action : 'delete' }, 
-                                          { action : 'update' }] });
+                                 actions:[{ action : 'list', allow:[], deny:[] }, 
+                                          { action : 'detail',  allow:[], deny:[] }, 
+                                          { action : 'edit',  allow:[], deny:[] }, 
+                                          { action : 'delete',  allow:[], deny:[] }, 
+                                          { action : 'update',  allow:[], deny:[] }] });
     });
   });
 
@@ -302,11 +303,11 @@ describe("Jakkel tests", function() {
       expect(jakkel.addResource("login", [ "open", "close" ])).toBe(true);
       expect(jakkel.allow("user","login",'*')).toBe( true );
       expect(jakkel.isAllowed("user", "login", "open")).toEqual(true);
-      console.log(jakkel.getLastError());
-      console.log(jakkel._explanation);
+      //console.log(jakkel.getLastError());
+      //console.log(jakkel._explanation);
       expect(jakkel.isAllowed("user", "login", "close")).toEqual(true);
-      console.log(jakkel.getLastError());
-      console.log(jakkel._explanation);
+      //console.log(jakkel.getLastError());
+      //console.log(jakkel._explanation);
     });    
     it("should allow one role for a resource with more than one non" +
         " '*' action specified)", function() {
@@ -404,7 +405,7 @@ describe("Jakkel tests", function() {
       jakkel.allow("user","login");
       jakkel._last_error = null;
       expect(jakkel.isAllowed("user", "login")).toBe( true );
-      console.log( jakkel.getExplanation() );
+      //console.log( jakkel.getExplanation() );
     });
     it("should return true for an allowed resource action, 1 role",  function() {
       jakkel.addRole("user");
@@ -413,7 +414,7 @@ describe("Jakkel tests", function() {
       expect(jakkel.isAllowed("user", "auth", "login")).toBe( true );
       //console.log( jakkel.explanation );
     });
-    xit("should return true for an allowed resource action, 2 roles - depends on order :(",  function() {
+    it("should return true for an allowed resource action, 2 roles - depends on order :(",  function() {
       jakkel.addRole("user");
       jakkel.addRole("admin");
       jakkel.addResource("auth", [ "login", "logout" ]);
@@ -460,10 +461,10 @@ describe("Jakkel tests", function() {
       jakkel.addRole("user");
       jakkel.addResource("auth");
       expect(jakkel.isAllowed("user", "auth", "*" )).toBe(jakkel._default);
-      console.log(jakkel.getExplanation());
+      //console.log(jakkel.getExplanation());
       jakkel._default = false;
       expect(jakkel.isAllowed("user", "auth", "*" )).toBe(jakkel._default);
-      console.log(jakkel.getExplanation());
+      //console.log(jakkel.getExplanation());
     });
     /* More Dragons!
      * Normal behaviour is for a deny to over-ride an allow - however in some
@@ -477,10 +478,10 @@ describe("Jakkel tests", function() {
       jakkel.deny("user", "auth", "login" );
       jakkel.allow("user", "auth", "logout" );
       expect(jakkel.isAllowed("user", "auth", "*" )).toBe(false);
-      console.log(jakkel.getExplanation());
+      //console.log(jakkel.getExplanation());
       jakkel._expand_wildcard_in_isallowed = true;
       expect(jakkel.isAllowed("user", "auth", "*" )).toBe(true);
-      console.log(jakkel.getExplanation());
+      //console.log(jakkel.getExplanation());
       delete jakkel._expand_wildcard_in_isallowed;
     });
   });
@@ -496,16 +497,19 @@ describe("Jakkel tests", function() {
       var allowed = jasmine.createSpy();
       var denied = jasmine.createSpy();
       expect(jakkel.ifAllowed("test", "test", allowed, denied)).toBe(undefined);
+      expect(allowed.calls.length === 0);
       expect(denied.calls.length === 1);
     });
     it("should be able to take four argument, no denied function ", function () {
       var allowed = jasmine.createSpy();
       expect(jakkel.ifAllowed("test", "test", "test", allowed)).toBe(undefined);
+      expect(allowed.calls.length === 0);
     });
     it("should be able to take five argument", function () {
       var allowed = jasmine.createSpy();
       var denied = jasmine.createSpy();
       expect(jakkel.ifAllowed("test", "test", "test", null, null)).toBe(undefined);
+      expect(allowed.calls.length === 0);
       expect(denied.calls.length === 1);
     });
     it("When using three arguments, should not call the callback with no access control set up", function () {
@@ -513,13 +517,33 @@ describe("Jakkel tests", function() {
       jakkel.ifAllowed("test", "test", allowed );
       expect(allowed.calls.length === 0);
     });
+    it("Should call the allowed function when the permissions allow it - three arguments", function() {
+      var allowed = jasmine.createSpy();
+      expect(jakkel.setConfig(valid_config)).toBe(true);
+      jakkel.ifAllowed("user", "products", allowed );
+      expect(allowed.calls.length === 1);
+    });
+    it("Should call the allowed function when the permissions allow it - four arguments", function() {
+      var allowed = jasmine.createSpy();
+      expect(jakkel.setConfig(valid_config)).toBe(true);
+      jakkel.ifAllowed("user", "products", "list", allowed );
+      expect(allowed.calls.length === 1);
+    });
+    it("Should call the allowed function when the permissions allow it - five arguments", function() {
+      var allowed = jasmine.createSpy();
+      var denied = jasmine.createSpy();
+      expect(jakkel.setConfig(valid_config)).toBe(true);
+      jakkel.ifAllowed("user", "products", "list", allowed, denied );
+      expect(allowed.calls.length === 1);
+      expect(denied.calls.length === 0);
+    });
   });
 
   describe("strict true checks", function() {
     config = { strict: true };
     strict = new Jakkel( config );
     it("should be turned on using config at creation", function() {
-      expect(strict._config.options["strict"]).toBe(true);
+      expect(strict._config.options.strict).toBe(true);
     });
     strict.flush();
     it("should prevent duplicate names for roles and resources", function() {

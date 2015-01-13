@@ -170,7 +170,7 @@
           msg = msg + " resourceName === null";
         } else if ( typeof resourceName !== 'string' ) {
           msg = msg + "typeof resourceName !== 'string'";
-        } else if ( typeof resourceName.lenght === 0 ) {
+        } else if ( typeof resourceName.length === 0 ) {
           msg = msg + "resourceName.length === 0";
         } else if ( this.resource(resourceName) ) {
           msg = msg + "this.resource(" + resourceName + ") returned" + 
@@ -376,6 +376,13 @@
     return this._updateAction( "deny", roleName, resourceName, opActions);
   };
 
+  /* Function:
+   * convienience function, does an action have allow or deny for a role
+   * @param action - the action we're checking
+   * @param allowOrDeny - string, what we're checking for
+   * @param roleName - role which we're checking the allow or deny list for
+   * @return true if action has an allow xor deny for given role.
+   */
   Jakkel.prototype._actionHas = function( action, allowOrDeny, roleName ) {
     return action[allowOrDeny].contains(roleName);
   };
